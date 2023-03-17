@@ -12,10 +12,7 @@ int *glbl_matrix_3_e_th;
 // int glbl_row_1,glbl_row_2,glbl_column_1,glbl_column_2;
 char *glbl_output_filename;
 
-typedef struct
-{
- int var1,var2;
-}test_struct;
+
 
 typedef struct
 {
@@ -44,7 +41,6 @@ void read_matrix_size (int *row_par, int *column_par, char *file_name){
 
 // void populate_matrix (int *row_par, int *column_par, char *file_name,int matrix[*row_par][*column_par]){
 void populate_matrix (int row_par, int column_par, char *file_name, int *matrix){
-
     char* extension = ".txt";
     char fileSpec[strlen(file_name)+strlen(extension)+1];
     FILE *fp;
@@ -65,6 +61,26 @@ void populate_matrix (int row_par, int column_par, char *file_name, int *matrix)
     }    
 }
 
+void write_matrix_to_file(int *matrix,int row,int column, char *filename, char* extension, char* message){
+    char fileSpec[strlen(filename)+strlen(extension)+1];
+    FILE *fp;
+    snprintf( fileSpec, sizeof( fileSpec ), "%s%s", filename, extension );
+    if((fp=fopen(fileSpec, "w"))==NULL) {
+        printf("Cannot open file.\n");
+    }
+    fwrite(message, sizeof(char), strlen(message), fp);
+    fprintf(fp, "\n");
+    fprintf(fp, "row=%d col=%d", row,column);
+    fprintf(fp, "\n");
+	for(int i=0; i<row; i++){
+		for(int j=0; j<column; j++){
+			fprintf(fp, "%d  \t", *(matrix + i * column+ j));
+		}
+		fprintf(fp, "\n");
+	}
+	fclose(fp);
+}
+
 void thread_per_matrix(combined_matrix_struct* lcl_matrices, char *file_name){
     gettimeofday(&glbl_matrices.start_tpm, NULL); //start checking time
     // int matrix_3[*row_par_1][*column_par_2];
@@ -83,7 +99,7 @@ void thread_per_matrix(combined_matrix_struct* lcl_matrices, char *file_name){
             }
         }
     }
-    printf("\nThe matrix is : \n");
+    printf("\nThe matrix using thread per matrix is : \n");
     for (int i = 0; i < out_row; i++) {
         printf("\n");
         for (int j = 0; j < out_col; j++) {
@@ -134,7 +150,7 @@ void thread_per_row(void){
     // joining and waiting for all threads to complete
     for (int i = 0; i < glbl_matrices.row_1; i++)
         pthread_join(threads[i], NULL);   
-     printf("\nThe matrix is : \n");
+    printf("\nThe matrix using thrad per row is : \n");
     for(int i=0;i<glbl_matrices.row_1;i++)
     {
         printf("\n");
@@ -151,7 +167,6 @@ void thread_per_row(void){
 void *multiply_element(void* arg){
     combined_matrix_struct *lcl_matrices;
     lcl_matrices = (combined_matrix_struct *) arg;
-    // int current_row = (int *)arg;
     int current_row = lcl_matrices->current_row;
     int current_column = lcl_matrices->current_column;
     int out_row = lcl_matrices->row_1;
@@ -190,7 +205,7 @@ void thread_per_element(void){
             pthread_join(threads[i][j], NULL);  
         }
     }
-     printf("\nThe matrix is : \n");
+     printf("\nThe matrix using thread per element is : \n");
     for(int i=0;i<glbl_matrices.row_1;i++)
     {
         printf("\n");
@@ -203,16 +218,41 @@ void thread_per_element(void){
     gettimeofday(&glbl_matrices.stop_tpe, NULL); //end checking time
 }
 void main (int argc, char **argv){
+    // printf("You have entered %d arguments:\n", argc);
+    char *input_filename_1;
+    char *input_filename_2;
+    char *out_filename;
 
+    if (argc == 4){
+        // char *input_filename_1,*input_filename_2;
+        // char *out_filename;
+        input_filename_1 = (char*) malloc((strlen(argv[1]) + 1) * sizeof(char));
+        strcpy(input_filename_1,argv[1]);
+        input_filename_2 = (char*) malloc((strlen(argv[2]) + 1) * sizeof(char));
+        strcpy(input_filename_2,argv[2]);        
+        out_filename = (char*) malloc((strlen(argv[3]) + 1) * sizeof(char));
+        strcpy(out_filename,argv[3]);    
+    }
+    else{
+        input_filename_1 = (char*) malloc((strlen("a") + 1) * sizeof(char));
+        strcpy(input_filename_1,"a");
+        input_filename_2 = (char*) malloc((strlen("b") + 1) * sizeof(char));
+        strcpy(input_filename_2,"b");        
+        out_filename = (char*) malloc((strlen("c") + 1) * sizeof(char));
+        strcpy(out_filename,"c");    
+    }
 
-    read_matrix_size (&glbl_matrices.row_1, &glbl_matrices.col_1,"test3/a");
-    read_matrix_size (&glbl_matrices.row_2, &glbl_matrices.col_2,"test3/b");
+    // printf("%s\n", input_filename_1);
+    // printf("%s\n", input_filename_2);
+    // printf("%s\n", out_filename);
+    read_matrix_size (&glbl_matrices.row_1, &glbl_matrices.col_1,input_filename_1);
+    read_matrix_size (&glbl_matrices.row_2, &glbl_matrices.col_2,input_filename_2);
 
     glbl_matrices.matrix_1 = (int*) malloc(glbl_matrices.row_1 * glbl_matrices.col_1 * sizeof(int));
     glbl_matrices.matrix_2 = (int*) malloc(glbl_matrices.row_2 * glbl_matrices.col_2 * sizeof(int));
     
-    populate_matrix (glbl_matrices.row_1, glbl_matrices.col_1, "test3/a", glbl_matrices.matrix_1);
-    populate_matrix (glbl_matrices.row_2, glbl_matrices.col_2, "test3/b", glbl_matrices.matrix_2);
+    populate_matrix (glbl_matrices.row_1, glbl_matrices.col_1, input_filename_1, glbl_matrices.matrix_1);
+    populate_matrix (glbl_matrices.row_2, glbl_matrices.col_2, input_filename_2, glbl_matrices.matrix_2);
     
     glbl_matrices.matrix_3_tpm = (int*) malloc(glbl_matrices.row_1 * glbl_matrices.col_2 * sizeof(int));
     glbl_matrices.matrix_3_tpr = (int*) malloc(glbl_matrices.row_1 * glbl_matrices.col_2 * sizeof(int));
@@ -226,13 +266,14 @@ void main (int argc, char **argv){
     printf("Microseconds taken by method 1: %lu\n", glbl_matrices.stop_tpm.tv_usec - glbl_matrices.start_tpm.tv_usec);
     printf("Microseconds taken by method 2: %lu\n", glbl_matrices.stop_tpr.tv_usec - glbl_matrices.start_tpr.tv_usec);
     printf("Microseconds taken by method 3: %lu\n", glbl_matrices.stop_tpe.tv_usec - glbl_matrices.start_tpr.tv_usec);
-
-
+    
+    write_matrix_to_file(glbl_matrices.matrix_3_tpm, glbl_matrices.row_1, glbl_matrices.col_2, out_filename, "_per_matrix.txt", "Method: A thread per matrix");
+    write_matrix_to_file(glbl_matrices.matrix_3_tpr, glbl_matrices.row_1, glbl_matrices.col_2, out_filename, "_per_row.txt", "Method: A thread per row");
+    write_matrix_to_file(glbl_matrices.matrix_3_tpe, glbl_matrices.row_1, glbl_matrices.col_2, out_filename, "_per_element.txt", "Method: A thread per element");
+    
     free(glbl_matrices.matrix_1);
     free(glbl_matrices.matrix_2); 
     free(glbl_matrices.matrix_3_tpm);
     free(glbl_matrices.matrix_3_tpr);
     free(glbl_matrices.matrix_3_tpe);
-
-
 }
