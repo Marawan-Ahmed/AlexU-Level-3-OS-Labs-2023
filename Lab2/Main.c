@@ -264,9 +264,12 @@ void main (int argc, char **argv){
 
     // printf("Seconds taken by method 1%lu\n", stop.tv_sec - start.tv_sec);
     printf("Microseconds taken by method 1: %lu\n", glbl_matrices.stop_tpm.tv_usec - glbl_matrices.start_tpm.tv_usec);
+    printf("Number of used threads by method 1: %d\n", 1);
     printf("Microseconds taken by method 2: %lu\n", glbl_matrices.stop_tpr.tv_usec - glbl_matrices.start_tpr.tv_usec);
+    printf("Number of used threads by method 2: %d\n", glbl_matrices.row_1);
     printf("Microseconds taken by method 3: %lu\n", glbl_matrices.stop_tpe.tv_usec - glbl_matrices.start_tpr.tv_usec);
-    
+    printf("Number of used threads by method 3: %d\n", glbl_matrices.row_1*glbl_matrices.col_2);
+
     write_matrix_to_file(glbl_matrices.matrix_3_tpm, glbl_matrices.row_1, glbl_matrices.col_2, out_filename, "_per_matrix.txt", "Method: A thread per matrix");
     write_matrix_to_file(glbl_matrices.matrix_3_tpr, glbl_matrices.row_1, glbl_matrices.col_2, out_filename, "_per_row.txt", "Method: A thread per row");
     write_matrix_to_file(glbl_matrices.matrix_3_tpe, glbl_matrices.row_1, glbl_matrices.col_2, out_filename, "_per_element.txt", "Method: A thread per element");
