@@ -9,10 +9,10 @@ struct station {
 	pthread_cond_t train_in_station;
 	pthread_cond_t passenger_boarded;
 
-	pthread_mutex_t rsrc_lock;
 	pthread_mutex_t waiting_lock;
 	pthread_mutex_t seats_lock;
 	pthread_mutex_t boarded_lock;
+	
 	pthread_mutex_t train_lock;
 };
 
