@@ -248,6 +248,10 @@ void main (int argc, char **argv){
     read_matrix_size (&glbl_matrices.row_1, &glbl_matrices.col_1,input_filename_1);
     read_matrix_size (&glbl_matrices.row_2, &glbl_matrices.col_2,input_filename_2);
 
+    if(glbl_matrices.col_1 != glbl_matrices.row_2){
+        printf("Error\n");
+        return;
+    }
     glbl_matrices.matrix_1 = (int*) malloc(glbl_matrices.row_1 * glbl_matrices.col_1 * sizeof(int));
     glbl_matrices.matrix_2 = (int*) malloc(glbl_matrices.row_2 * glbl_matrices.col_2 * sizeof(int));
     
