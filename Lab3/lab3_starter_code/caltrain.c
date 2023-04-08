@@ -1,6 +1,5 @@
 #include <pthread.h>
 #include "caltrain.h"
-#include <stdio.h>
 
 
 void
