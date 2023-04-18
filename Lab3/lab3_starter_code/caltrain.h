@@ -9,11 +9,7 @@ struct station {
 	pthread_cond_t train_in_station;
 	pthread_cond_t passenger_boarded;
 
-	pthread_mutex_t waiting_lock;
-	pthread_mutex_t seats_lock;
-	pthread_mutex_t boarded_lock;
-	
-	pthread_mutex_t train_lock;
+	pthread_mutex_t station_lock;
 };
 
 void station_init(struct station *station);
